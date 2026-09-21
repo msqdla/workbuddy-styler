@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号样式排版工具</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --green:#07c160; --green-d:#05934a; --ink:#1f2329; --sub:#86909c;
+  --line:#e5e6eb; --bg:#f4f6f8; --card:#fff; --blue:#165dff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:10px;flex:none}
+header .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#07c160,#10d375);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700}
+header h1{font-size:16px;font-weight:600}
+header .desc{font-size:12px;color:var(--sub)}
+main{flex:1;display:flex;min-height:0}
+.left{width:460px;flex:none;border-right:1px solid var(--line);overflow-y:auto;padding:16px;background:var(--bg)}
+.right{flex:1;display:flex;flex-direction:column;min-width:0;background:#e8ebf0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.step-num{width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.row{display:flex;gap:8px}
+input[type=text],textarea,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px;outline:none;font-family:inherit;transition:border .15s}
+input[type=text]:focus,textarea:focus{border-color:var(--green)}
+textarea{resize:vertical;min-height:200px;line-height:1.7;font-size:13px}
+button{border:none;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+.btn-main{background:var(--green);color:#fff;font-weight:600}
+.btn-main:hover{background:var(--green-d)}
+.btn-main:disabled{background:#a8dfc3;cursor:not-allowed}
+.btn-ghost{background:#f2f3f5;color:var(--ink)}
+.btn-ghost:hover{background:#e5e6eb}
+.btn-blue{background:var(--blue);color:#fff;font-weight:600}
+.btn-sm{padding:6px 12px;font-size:12px}
+.hint{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.meta-item{background:#f7f8fa;border-radius:8px;padding:8px 10px}
+.meta-item .k{font-size:11px;color:var(--sub)}
+.meta-item .v{font-size:13px;font-weight:600;margin-top:2px;display:flex;align-items:center;gap:6px;word-break:break-all}
+.dot{width:14px;height:14px;border-radius:4px;border:1px solid rgba(0,0,0,.08);flex:none}
+.tune-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tune-item label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px}
+.tune-item input[type=number],.tune-item input[type=text]{padding:6px 9px;font-size:12px}
+.tune-item input[type=color]{width:100%;height:32px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);cursor:pointer;user-select:none}
+.status{font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:12px;display:none;line-height:1.5}
+.status.ok{display:block;background:#e8ffea;color:#05934a;border:1px solid #b7ebc6}
+.status.err{display:block;background:#ffece8;color:#f53f3f;border:1px solid #fdcdc5}
+.status.info{display:block;background:#e8f3ff;color:#165dff;border:1px solid #bedaff}
+.toolbar{flex:none;display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.toolbar .spacer{flex:1}
+.tabs{display:flex;gap:4px;background:#f2f3f5;border-radius:8px;padding:3px}
+.tabs button{padding:5px 12px;font-size:12px;border-radius:6px;background:transparent;color:var(--sub)}
+.tabs button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.preview-area{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
+.phone{width:400px;max-width:100%;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden;flex:none}
+.phone-bar{height:36px;background:#f7f8fa;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--sub)}
+.phone iframe{width:100%;height:calc(100vh - 190px);border:none;display:block}
+.full iframe{width:82vw;height:calc(100vh - 190px)}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);gap:10px}
+.empty .icon{font-size:44px;opacity:.35}
+.md-tools{display:flex;gap:8px;margin-top:8px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:5px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (max-width:900px){.left{width:100%}.right{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">W</div>
+  <div>
+    <h1>公众号样式排版工具</h1>
+    <div class="desc">抓取任意公众号文章的排版样式 → 一键套用到你的 Markdown</div>
+  </div>
+</header>
+<main>
+  <div class="left">
+    <div id="status" class="status"></div>
+
+    <div class="card">
+      <h2><span class="step-num">1</span>粘贴公众号文章链接</h2>
+      <div class="row">
+        <input type="text" id="url" placeholder="https://mp.weixin.qq.com/s/...">
+        <button class="btn-main" id="btnFetch" onclick="fetchTheme()">抓取样式</button>
+      </div>
+      <div class="hint">支持 mp.weixin.qq.com/s/… 与 /s?__biz=… 两种链接；样式抓取后会缓存，改内容不用重抓。</div>
+      <div id="metaBox" style="display:none">
+        <div class="meta-grid">
+          <div class="meta-item" style="grid-column:1/3"><div class="k">原文标题</div><div class="v" id="mTitle">-</div></div>
+          <div class="meta-item"><div class="k">公众号</div><div class="v" id="mAccount">-</div></div>
+          <div class="meta-item"><div class="k">正文字号</div><div class="v" id="mSize">-</div></div>
+          <div class="meta-item"><div class="k">正文颜色</div><div class="v"><span class="dot" id="mColorDot"></span><span id="mColor">-</span></div></div>
+          <div class="meta-item"><div class="k">主题强调色</div><div class="v"><span class="dot" id="mAccentDot"></span><span id="mAccent">-</span></div></div>
+        </div>
+        <div style="margin-top:10px"><button class="btn-ghost btn-sm" onclick="showOriginal()">👁 预览原文排版</button>
+        <button class="btn-ghost btn-sm" onclick="refetch()">🔄 重新抓取</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step-num">2</span>粘贴你的 Markdown</h2>
+      <textarea id="md" placeholder="# 标题&#10;&#10;正文段落，支持 **加粗**、[链接](url)、列表、表格、代码块、> 引用、图片 ![](url) …"></textarea>
+      <div class="md-tools">
+        <button class="btn-ghost btn-sm" onclick="document.getElementById('file').click()">📄 上传 .md 文件</button>
+        <button class="btn-ghost btn-sm" onclick="loadSample()">✨ 载入示例</button>
+        <input type="file" id="file" accept=".md,.markdown,.txt" style="display:none" onchange="loadFile(this)">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step-num">3</span>微调（可选）</h2>
+      <div class="tune-grid">
+        <div class="tune-item"><label>主题色</label><input type="color" id="tAccent"></div>
+        <div class="tune-item"><label>背景色</label><input type="color" id="tBg"></div>
+        <div class="tune-item"><label>正文字号 (px)</label><input type="number" id="tSize" placeholder="默认跟随原文" step="0.5" min="12" max="24"></div>
+        <div class="tune-item"><label>行高 (倍)</label><input type="number" id="tLh" placeholder="默认跟随原文" step="0.05" min="1.2" max="2.6"></div>
+        <div class="tune-item"><label>字间距 (px)</label><input type="number" id="tLs" placeholder="默认" step="0.1" min="0" max="4"></div>
+        <div class="tune-item"><label>首行缩进 (em)</label><input type="number" id="tIndent" placeholder="0" step="0.5" min="0" max="2"></div>
+        <div class="tune-item"><label>对齐</label><select id="tAlign"><option value="">跟随原文</option><option value="justify">两端对齐</option><option value="left">左对齐</option></select></div>
+        <div class="tune-item" style="display:flex;align-items:flex-end;padding-bottom:6px">
+          <label class="chk"><input type="checkbox" id="tEmbed"> 内嵌图片为 base64</label>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px">文章标题：<input type="text" id="tTitle" placeholder="留空则用原文标题" style="margin-top:4px"></div>
+    </div>
+
+    <button class="btn-main" id="btnRender" style="width:100%;padding:12px;font-size:14px" onclick="doRender(true)">⚡ 生成同款排版</button>
+    <div class="hint" style="text-align:center">生成后可在右侧预览、下载 HTML 或导出长图</div>
+  </div>
+
+  <div class="right">
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="on" id="tabGen" onclick="switchTab('gen')">生成效果</button>
+        <button id="tabSrc" onclick="switchTab('src')">原文对照</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn-ghost btn-sm" id="btnCopy" onclick="copyFragment()">📋 复制正文（粘进公众号编辑器）</button>
+      <button class="btn-ghost btn-sm" id="btnDl" onclick="downloadHtml()">⬇️ 下载 HTML</button>
+      <button class="btn-blue btn-sm" id="btnPng" onclick="exportPng()">🖼 导出长图</button>
+    </div>
+    <div class="preview-area">
+      <div class="phone" id="phone">
+        <div class="phone-bar">预览 · 宽 400px</div>
+        <iframe id="frame"></iframe>
+      </div>
+      <div class="empty" id="empty"><div class="icon">📰</div><div>先抓取样式、填入 Markdown，再点「生成」</div></div>
+    </div>
+  </div>
+</main>
+<script>
+let THEME=null, INFO=null, PREVIEW='', LAST={html:'',frag:''};
+const $=id=>document.getElementById(id);
+
+function status(msg,type){const s=$('status');s.textContent='';s.className='status '+type;s.textContent=msg;}
+function busy(btn,on,label){if(on){btn.dataset.t=btn.textContent;btn.disabled=true;btn.innerHTML='<span class="spin"></span>'+(label||'处理中…');}else{btn.disabled=false;btn.textContent=btn.dataset.t||btn.textContent;}}
+
+async function fetchTheme(){
+  const url=$('url').value.trim();
+  if(!url){status('请先粘贴公众号文章链接','err');return;}
+  busy($('btnFetch'),true,'抓取中…');status('正在打开文章并提取样式，约需 5~15 秒…','info');
+  try{
+    const r=await fetch('/api/fetch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+    const j=await r.json();
+    if(!j.ok){status(j.error||'抓取失败','err');busy($('btnFetch'),false);return;}
+    THEME=j.theme;INFO=j.info;PREVIEW=j.preview;
+    $('metaBox').style.display='block';
+    $('mTitle').textContent=INFO.title||'(未获取到标题)';
+    $('mAccount').textContent=INFO.account||'-';
+    $('mSize').textContent=INFO.bodySize||'-';
+    $('mColor').textContent=INFO.bodyColor;$('mColorDot').style.background=INFO.bodyColor;
+    $('mAccent').textContent=INFO.accent;$('mAccentDot').style.background=INFO.accent;
+    $('tAccent').value=toHex(INFO.accent,'#07c160');
+    $('tBg').value=toHex(INFO.background,'#ffffff');
+    status('样式抓取成功：「'+(INFO.title||'').slice(0,40)+'」','ok');
+  }catch(e){status('抓取失败：'+e.message,'err');}
+  busy($('btnFetch'),false);
+}
+function refetch(){THEME=null;fetchTheme();}
+
+function toHex(c,fallback){
+  if(!c) return fallback;
+  if(c.startsWith('#')) return c.length===4?'#'+[...c.slice(1)].map(x=>x+x).join(''):c;
+  const m=c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if(!m) return fallback;
+  return '#'+[+m[1],+m[2],+m[3]].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function showOriginal(){
+  if(!PREVIEW){status('请先抓取样式','err');return;}
+  switchTab('src');
+  $('frame').srcdoc=`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>body{margin:0;padding:16px 14px;font-size:16px}img{max-width:100%!important;height:auto!important}</style></head>
+  <body>${PREVIEW}</body></html>`;
+}
+function switchTab(t){
+  $('tabGen').classList.toggle('on',t==='gen');
+  $('tabSrc').classList.toggle('on',t==='src');
+}
+
+function tweaks(){
+  const t={};
+  if($('tAccent').value) t.accent=$('tAccent').value;
+  if($('tBg').value) t.background=$('tBg').value;
+  if($('tSize').value) t.fontSize=+$('tSize').value;
+  if($('tLh').value) t.lineHeight=+$('tLh').value;
+  if($('tLs').value) t.letterSpacing=+$('tLs').value;
+  if($('tIndent').value) t.indent=+$('tIndent').value;
+  if($('tAlign').value) t.align=$('tAlign').value;
+  return t;
+}
+
+async function doRender(scroll){
+  if(!THEME){status('请先抓取公众号样式（第 1 步）','err');return;}
+  const md=$('md').value.trim();
+  if(!md){status('请先填入 Markdown 内容（第 2 步）','err');return;}
+  busy($('btnRender'),true,'生成中…');
+  try{
+    const r=await fetch('/api/render',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({theme:THEME,markdown:$('md').value,tweaks:tweaks(),title:$('tTitle').value,embed:$('tEmbed').checked})});
+    const j=await r.json();
+    if(!j.ok){status(j.error||'生成失败','err');busy($('btnRender'),false);return;}
+    LAST.html=j.html;LAST.frag=j.fragment;
+    $('empty').style.display='none';$('phone').style.display='block';
+    switchTab('gen');
+    $('frame').srcdoc=j.html;
+    status('生成完成 ✅ 可下载 HTML、复制进公众号编辑器，或导出长图','ok');
+  }catch(e){status('生成失败：'+e.message,'err');}
+  busy($('btnRender'),false);
+}
+
+function downloadHtml(){
+  if(!LAST.html){status('请先生成','err');return;}
+  const name=($('tTitle').value||INFO?.title||'article').replace(/[\\/:*?"<>|]/g,'_').slice(0,50)+'.html';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([LAST.html],{type:'text/html'}));
+  a.download=name;a.click();
+}
+async function copyFragment(){
+  if(!LAST.frag){status('请先生成','err');return;}
+  try{
+    await navigator.clipboard.writeText(LAST.frag);
+    status('正文已复制 ✅ 打开公众号后台编辑器，直接 Ctrl+V 粘贴（样式随粘贴保留）','ok');
+  }catch(e){
+    status('浏览器拒绝了剪贴板权限，请改用「下载 HTML」后用浏览器打开复制','err');
+  }
+}
+async function exportPng(){
+  if(!LAST.html){status('请先生成','err');return;}
+  busy($('btnPng'),true,'导出中…');
+  try{
+    const r=await fetch('/api/png',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:LAST.html,width:750})});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||'导出失败');}
+    const b=await r.blob();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);a.download='公众号排版长图.png';a.click();
+    status('长图已导出 ✅（约 '+(b.size/1024).toFixed(0)+' KB）','ok');
+  }catch(e){status('导出失败：'+e.message,'err');}
+  busy($('btnPng'),false);
+}
+function loadFile(inp){
+  const f=inp.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{$('md').value=rd.result;if(!$('tTitle').value)$('tTitle').value=f.name.replace(/\.(md|markdown|txt)$/i,'');status('已载入 '+f.name,'ok');};
+  rd.readAsText(f);
+}
+function loadSample(){
+  $('md').value=`# 为什么我们需要「慢下来」的能力
+
+这是套用公众号原文样式后生成的一段正文，用来检查字号、行距、字间距和对齐方式是否一致。
+
+## 一、先从一个问题说起
+
+我们习惯把效率当成唯一指标，但**真正重要的判断**往往需要时间沉淀。下面三点值得留意：
+
+1. 决策质量与信息密度并非线性关系
+2. 快速反馈容易让人误判因果关系
+3. 留白本身就是一种生产力
+
+> 慢不是拖延，而是把注意力放在真正重要的事情上。
+
+### 1.1 一个对照实验
+
+| 组别 | 决策耗时 | 正确率 |
+| --- | --- | --- |
+| 快速组 | 3 分钟 | 52% |
+| 慢思组 | 15 分钟 | 78% |
+
+## 二、怎么做
+
+\`\`\`python
+def think(problem, minutes=15):
+    return decide([observe(problem, i) for i in range(minutes)])
+\`\`\`
+
+- 每天留出 30 分钟不被打断的时间
+- 用纸笔替代屏幕做第一轮梳理
+
+---
+
+*如果你也认同，欢迎转发给需要的朋友。*`;
+  status('示例已载入，点「生成同款排版」看效果','ok');
+}
+$('md').addEventListener('input',()=>{if(LAST.html)clearTimeout(window._t),window._t=setTimeout(()=>doRender(false),1200);});
+</script>
+</body>
+</html>

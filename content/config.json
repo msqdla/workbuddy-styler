@@ -1,0 +1,11 @@
+{
+  "site_title": "我的公众号排版成品",
+  "style_url": "https://mp.weixin.qq.com/s/Uw6b7_W_NkCZDIce4Obn6g",
+  "articles": [
+    {
+      "md": "示例文章.md",
+      "title": "示例：套用公众号样式后的效果",
+      "png": true
+    }
+  ]
+}
