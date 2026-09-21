@@ -1,0 +1,98 @@
+name: 生成公众号排版
+
+on:
+  push:
+    paths:
+      - "content/**"
+      - "renderer.py"
+      - "extractor.py"
+      - "build.py"
+  workflow_dispatch:
+    inputs:
+      style_url:
+        description: "样式来源：公众号文章链接"
+        required: false
+        default: ""
+      md_file:
+        description: "要排版的 Markdown 路径（留空则按 content/config.json 批量生成）"
+        required: false
+        default: ""
+      title:
+        description: "文章标题"
+        required: false
+        default: ""
+      with_png:
+        description: "同时导出长图"
+        type: boolean
+        default: true
+      publish_pages:
+        description: "发布到 GitHub Pages（需先在仓库 Settings → Pages → Source 选 GitHub Actions）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 安装 Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: 生成成品
+        run: |
+          mkdir -p output
+          ARGS="--png"
+          if [ -n "${{ inputs.style_url }}" ]; then ARGS="$ARGS --url ${{ inputs.style_url }}"; fi
+          if [ -n "${{ inputs.md_file }}" ]; then ARGS="$ARGS --md ${{ inputs.md_file }}"; fi
+          if [ -n "${{ inputs.title }}" ]; then ARGS="$ARGS --title ${{ inputs.title }}"; fi
+          if [ "${{ inputs.with_png }}" = "false" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ]; then ARGS=""; fi
+          python3 build.py --out output $ARGS
+
+      - name: 上传成品（Actions → Artifacts 可下载）
+        uses: actions/upload-artifact@v4
+        with:
+          name: 公众号排版成品
+          path: output/
+          if-no-files-found: error
+
+      - name: 把成品提交回仓库
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/
+          git diff --quiet --cached || git commit -m "chore: 自动更新排版成品 [skip ci]"
+          git push
+
+      - name: 配置 Pages
+        if: inputs.publish_pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传 Pages 产物
+        if: inputs.publish_pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/
+
+      - name: 部署到 Pages
+        if: inputs.publish_pages
+        id: deployment
+        uses: actions/deploy-pages@v4
