@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>公众号排版克隆器 · 单文件版</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--g:#07c160;--gd:#05934a;--ink:#1f2329;--sub:#86909c;--line:#e5e6eb;--bg:#f4f6f8;--blue:#165dff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{background:#fff;border-bottom:1px solid var(--line);padding:11px 20px;display:flex;align-items:center;gap:10px;flex:none;flex-wrap:wrap}
+.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#07c160,#10d375);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+header h1{font-size:15px;font-weight:600}
+.badge{font-size:11px;background:#e8ffea;color:var(--gd);padding:2px 8px;border-radius:20px;border:1px solid #b7ebc6}
+main{flex:1;display:flex;min-height:0}
+.left{width:440px;flex:none;overflow-y:auto;padding:14px;border-right:1px solid var(--line)}
+.right{flex:1;display:flex;flex-direction:column;background:#e8ebf0;min-width:0}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:12px}
+.card h2{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.sn{width:18px;height:18px;border-radius:50%;background:var(--g);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+button{border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+.b-main{background:var(--g);color:#fff;font-weight:600}.b-main:hover{background:var(--gd)}
+.b-main:disabled{background:#a8dfc3;cursor:not-allowed}
+.b-ghost{background:#f2f3f5;color:var(--ink)}.b-ghost:hover{background:#e5e6eb}
+.b-blue{background:var(--blue);color:#fff;font-weight:600}
+.bs{padding:5px 10px;font-size:12px}
+textarea,input[type=text],input[type=number],select{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;font-family:inherit;background:#fff}
+textarea:focus,input:focus,select:focus{border-color:var(--g)}
+textarea{resize:vertical;line-height:1.7}
+.hint{font-size:12px;color:var(--sub);margin-top:7px;line-height:1.65}
+.hint code{background:#f2f3f5;padding:1px 5px;border-radius:4px;font-size:11px}
+.row{display:flex;gap:7px}.row>*{flex:1}
+.drop{border:1.5px dashed #c9cdd4;border-radius:10px;padding:18px;text-align:center;color:var(--sub);font-size:12.5px;cursor:pointer;background:#fafbfc;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--g);background:#f0fff5;color:var(--gd)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mi{background:#f7f8fa;border-radius:8px;padding:7px 9px}
+.mi .k{font-size:11px;color:var(--sub)}.mi .v{font-size:12.5px;font-weight:600;margin-top:1px;display:flex;align-items:center;gap:5px;word-break:break-all}
+.dot{width:13px;height:13px;border-radius:4px;border:1px solid rgba(0,0,0,.1);flex:none}
+.st{font-size:12px;padding:7px 11px;border-radius:8px;margin-bottom:11px;display:none;line-height:1.5}
+.st.ok{display:block;background:#e8ffea;color:var(--gd);border:1px solid #b7ebc6}
+.st.err{display:block;background:#ffece8;color:#f53f3f;border:1px solid #fdcdc5}
+.st.info{display:block;background:#e8f3ff;color:var(--blue);border:1px solid #bedaff}
+.bar{flex:none;display:flex;gap:9px;align-items:center;padding:9px 14px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sp{flex:1}
+.pv{flex:1;overflow:auto;padding:18px;display:flex;justify-content:center;align-items:flex-start}
+.phone{width:400px;max-width:100%;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden;flex:none;display:none}
+.phone-bar{height:34px;background:#f7f8fa;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub)}
+.phone iframe{width:100%;height:calc(100vh - 175px);border:none;display:block}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);gap:9px;text-align:center;padding:20px}
+.empty .ic{font-size:40px;opacity:.3}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:4px}
+@keyframes s{to{transform:rotate(360deg)}}
+.tg{font-size:12px;color:var(--blue);cursor:pointer;text-decoration:underline}
+details{margin-top:9px}
+summary{font-size:12px;color:var(--sub);cursor:pointer}
+@media(max-width:900px){.left{width:100%}.right{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">W</div>
+  <h1>公众号排版克隆器</h1>
+  <span class="badge">单文件 · 离线可用 · 零安装</span>
+</header>
+
+<main>
+<div class="left">
+  <div id="st" class="st"></div>
+
+  <div class="card">
+    <h2><span class="sn">1</span>导入样式样板文章</h2>
+    <div class="drop" id="drop">
+      📄 把样板文章的网页源码拖进来 / 点击选择 .html 文件<br>
+      <span style="font-size:11.5px">在公众号文章页按 <code>Ctrl+U</code>(Mac ⌘+U) → 全选复制 → 保存为 .html，或直接粘贴到下面</span>
+    </div>
+    <input type="file" id="file" accept=".html,.htm,.mhtml,.txt" style="display:none">
+    <details>
+      <summary>✂️ 手动粘贴源码（不用存文件）</summary>
+      <textarea id="srcHtml" rows="4" style="margin-top:6px;font-size:11px" placeholder="粘贴 <!DOCTYPE html> ... 整页源码"></textarea>
+      <button class="b-ghost bs" style="margin-top:6px" onclick="loadFromText()">从粘贴框导入</button>
+    </details>
+    <div class="row" style="margin-top:9px">
+      <input type="text" id="url" placeholder="或用链接自动抓取（走公共代理，可能失败）">
+      <button class="b-ghost" style="flex:none" onclick="loadFromUrl()">抓取</button>
+    </div>
+    <div class="hint">链接抓取依赖第三方代理，不稳定；<b>推荐用源码导入</b>，100% 成功且可离线。</div>
+    <div id="meta" style="display:none;margin-top:11px">
+      <div class="grid2">
+        <div class="mi" style="grid-column:1/3"><div class="k">样板文章</div><div class="v" id="mTitle">-</div></div>
+        <div class="mi"><div class="k">正文字号</div><div class="v" id="mSize">-</div></div>
+        <div class="mi"><div class="k">行距</div><div class="v" id="mLh">-</div></div>
+        <div class="mi"><div class="k">正文颜色</div><div class="v"><span class="dot" id="mCd"></span><span id="mC">-</span></div></div>
+        <div class="mi"><div class="k">主题色</div><div class="v"><span class="dot" id="mAd"></span><span id="mA">-</span></div></div>
+      </div>
+      <button class="b-ghost bs" style="margin-top:9px" onclick="toggleTune()">⚙️ 微调样式</button>
+      <div id="tune" style="display:none;margin-top:10px">
+        <div class="grid2">
+          <div><label class="k" style="font-size:11px;color:var(--sub)">主题色</label><input type="color" id="tA"></div>
+          <div><label class="k" style="font-size:11px;color:var(--sub)">背景色</label><input type="color" id="tB"></div>
+          <div><label class="k" style="font-size:11px;color:var(--sub)">字号 px</label><input type="number" id="tS" step="0.5" placeholder="跟随原文"></div>
+          <div><label class="k" style="font-size:11px;color:var(--sub)">行高 倍</label><input type="number" id="tL" step="0.05" placeholder="跟随原文"></div>
+          <div><label class="k" style="font-size:11px;color:var(--sub)">字间距 px</label><input type="number" id="tLs" step="0.1" placeholder="跟随原文"></div>
+          <div><label class="k" style="font-size:11px;color:var(--sub)">首行缩进 em</label><input type="number" id="tI" step="0.5" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="span"><span class="sn">2</span></span>粘贴你的 Markdown</h2>
+    <textarea id="md" rows="11" placeholder="# 标题&#10;&#10;正文段落，支持 **加粗**、列表、> 引用、表格、代码块、图片"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="b-ghost bs" onclick="document.getElementById('mdf').click()">📄 上传 .md</button>
+      <button class="b-ghost bs" onclick="sample()">✨ 载入示例</button>
+      <input type="file" id="mdf" accept=".md,.markdown,.txt" style="display:none" onchange="loadMd(this)">
+    </div>
+  </div>
+
+  <button class="b-main" id="btnGo" style="width:100%;padding:11px;font-size:14px" onclick="go()">⚡ 生成同款排版</button>
+  <div class="hint" style="text-align:center;margin-top:8px">生成后可下载 HTML / 复制进公众号编辑器 / 导出长图</div>
+</div>
+
+<div class="right">
+  <div class="bar">
+    <span style="font-size:12px;color:var(--sub)" id="barInfo">预览</span>
+    <span class="sp"></span>
+    <button class="b-ghost bs" onclick="copyFrag()">📋 复制正文</button>
+    <button class="b-ghost bs" onclick="dl()">⬇️ 下载 HTML</button>
+    <button class="b-blue bs" onclick="png()">🖼 导出长图</button>
+  </div>
+  <div class="pv">
+    <div class="phone" id="phone"><div class="phone-bar">预览 · 375px</div><iframe id="fr"></iframe></div>
+    <div class="empty" id="empty"><div class="ic">📰</div><div>先导入样板文章，再贴 Markdown，点「生成」<br><span style="font-size:12px">成品会完整保留样板文章的字号、颜色、行距和装饰</span></div></div>
+  </div>
+</div>
+</main>
+
+<script>
+/* ============ 状态 ============ */
+var THEME=null, LAST={html:'',frag:''};
+var $=function(i){return document.getElementById(i)};
+function st(m,t){var s=$('st');s.className='st '+t;s.textContent=m}
+function busy(b,on,l){if(on){b.dataset.t=b.textContent;b.disabled=true;b.innerHTML='<span class="spin"></span>'+(l||'…')}else{b.disabled=false;b.textContent=b.dataset.t||b.textContent}}
+function toggleTune(){var e=$('tune');e.style.display=e.style.display==='none'?'block':'none'}
+
+/* ============ 样式提取（纯前端：读内联 style + 继承推断） ============ */
+var INHERIT=['fontSize','color','lineHeight','letterSpacing','textAlign','fontFamily','fontWeight','textIndent','fontStyle','wordSpacing'];
+
+function camel(k){return k.replace(/-([a-z])/g,function(m,c){return c.toUpperCase()})}
+function kebab(k){return k.replace(/([A-Z])/g,'-$1').toLowerCase()}
+
+function styleObj(el){
+  var o={},raw=el.getAttribute('style');
+  if(raw){
+    raw.split(';').forEach(function(d){
+      var i=d.indexOf(':');if(i<0)return;
+      var k=camel(d.slice(0,i).trim().toLowerCase()),v=d.slice(i+1).trim();
+      if(k&&v)o[k]=v;
+    });
+  }
+  return o;
+}
+/* 元素最终样式 = 自身 style + 从祖先继承的可继承属性 */
+function eff(el,root){
+  var own=styleObj(el),r={},chain=[],n=el;
+  while(n&&n!==document){chain.unshift(n);n=n.parentElement}
+  for(var i=0;i<chain.length;i++){
+    var s=styleObj(chain[i]);
+    for(var j=0;j<INHERIT.length;j++){var k=INHERIT[j];if(s[k])r[k]=s[k]}
+  }
+  for(var k2 in own)r[k2]=own[k2];
+  return r;
+}
+function txtOf(el){
+  var t='';
+  el.childNodes.forEach(function(n){if(n.nodeType===3)t+=n.textContent});
+  return t.trim();
+}
+function isGrey(c){
+  var m=/rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c||'');if(!m)return true;
+  var a=[+m[1],+m[2],+m[3]];return Math.max.apply(null,a)-Math.min.apply(null,a)<18;
+}
+function pxnum(v){var n=parseFloat(String(v||'').replace(/[^\d.\-]/g,''));return isNaN(n)?0:n}
+
+function extractTheme(html){
+  var doc=new DOMParser().parseFromString(html,'text/html');
+  var root=doc.querySelector('#js_content')||doc.querySelector('.rich_media_content')||doc.querySelector('#img-content')||doc.body;
+  if(!root) throw new Error('没找到正文容器（#js_content），请确认粘贴的是公众号文章完整源码');
+
+  root.querySelectorAll('img').forEach(function(im){
+    var d=im.getAttribute('data-src')||im.getAttribute('data-croporisrc');
+    if(d&&!im.getAttribute('src'))im.setAttribute('src',d);
+  });
+
+  /* 采样：带有直接文本的块 */
+  var blocks=[];
+  root.querySelectorAll('*').forEach(function(el){
+    if(['SCRIPT','STYLE','BR','IMG'].indexOf(el.tagName)>=0)return;
+    if(txtOf(el).length>=6)blocks.push(el);
+  });
+  if(!blocks.length)throw new Error('正文里没解析出文字，源码可能被截断');
+
+  /* 正文字号/颜色：按文本量加权取众数；内联覆盖率不足时用微信默认值 */
+  var totText=0,szText=0,coText=0;
+  blocks.forEach(function(el){
+    var L=Math.min(txtOf(el).length,300);totText+=L;
+    var s=eff(el,root);
+    if(s.fontSize)szText+=L;
+    if(s.color)coText+=L;
+  });
+  function weighted(fn,filter){
+    var w={};
+    blocks.forEach(function(el){
+      if(filter&&!filter(el))return;
+      var k=fn(el);if(!k)return;
+      w[k]=(w[k]||0)+Math.min(txtOf(el).length,300);
+    });
+    var a=Object.keys(w).map(function(k){return [k,w[k]]}).sort(function(x,y){return y[1]-x[1]});
+    return a.length?a[0][0]:null;
+  }
+  var hasSize=szText/Math.max(totText,1)>0.5, hasColor=coText/Math.max(totText,1)>0.5;
+  var bodySize=hasSize?(weighted(function(el){return eff(el,root).fontSize})||'17px'):'17px';
+  var bsNum=pxnum(bodySize);
+  var isBody=function(el){return Math.abs(pxnum(eff(el,root).fontSize)-bsNum)<0.6};
+  var bodyColor=hasColor?(weighted(function(el){return eff(el,root).color},isBody)||'rgba(0, 0, 0, 0.9)'):'rgba(0, 0, 0, 0.9)';
+
+  /* 段落样式众数 */
+  var PK=['fontSize','color','lineHeight','letterSpacing','textAlign','textIndent','fontFamily','marginTop','marginBottom'];
+  var cnt={};
+  blocks.filter(isBody).forEach(function(el){
+    var s=eff(el,root);
+    var sig=PK.map(function(k){return s[k]||''}).join('|');
+    cnt[sig]=cnt[sig]||{n:0,s:s};cnt[sig].n++;
+  });
+  var para={},arr=Object.keys(cnt).map(function(k){return cnt[k]}).sort(function(a,b){return b.n-a.n});
+  if(arr.length){var s0=arr[0].s;PK.forEach(function(k){if(s0[k])para[k]=s0[k]})}
+  if(!para.fontSize)para.fontSize=bodySize;
+  if(!para.color)para.color=bodyColor;
+
+  /* 标题：字号更大或加粗 */
+  var cand={};
+  blocks.forEach(function(el){
+    var s=eff(el,root),fs=pxnum(s.fontSize),bold=(parseInt(s.fontWeight)||400)>=600;
+    var p=el.parentElement,ps=p&&p!==root?eff(p,root):{};
+    if(fs<=bsNum+0.6&&!bold)return;
+    var deco=function(o){return (o.backgroundColor&&o.backgroundColor!=='rgba(0, 0, 0, 0)')||pxnum(o.borderLeftWidth)>0||(o.backgroundImage&&o.backgroundImage!=='none')};
+    var bk=Math.round(fs*2)/2;if(!isFinite(bk))return;
+    var sc=(bold?3:0)+(fs-bsNum)*2+(deco(s)?4:0)+(deco(ps)?4:0)+Math.min(txtOf(el).length,40)*0.05;
+    cand[bk]=cand[bk]||{best:null,bs:-1};
+    if(sc>cand[bk].bs){cand[bk].bs=sc;cand[bk].best={in:s,wr:ps}}
+  });
+  var HK=['fontSize','color','fontWeight','lineHeight','letterSpacing','textAlign','marginTop','marginBottom','paddingTop','paddingBottom','paddingLeft','paddingRight','backgroundColor','borderRadius','fontFamily'];
+  var WK=['backgroundColor','borderLeftWidth','borderLeftStyle','borderLeftColor','borderRadius','paddingTop','paddingBottom','paddingLeft','paddingRight','marginTop','marginBottom','textAlign'];
+  function pick(o,ks){var r={};ks.forEach(function(k){if(o&&o[k])r[k]=o[k]});return r}
+  var lv=Object.keys(cand).map(Number).sort(function(a,b){return b-a}),chosen=[],heads={};
+  lv.forEach(function(x){if(chosen.length<3&&!chosen.some(function(c){return Math.abs(c-x)<1.5}))chosen.push(x)});
+  chosen.forEach(function(x,i){
+    var b=cand[x]&&cand[x].best;if(!b)return;
+    heads['h'+(i+1)]={style:pick(b.in,HK),wrapper:pick(b.wr,WK)};
+  });
+
+  /* 引用：左边框或非白背景 */
+  var quote=null;
+  root.querySelectorAll('*').forEach(function(el){
+    if(quote)return;
+    if(el===root||el.parentElement===root)return;
+    var s=eff(el,root),t=txtOf(el);
+    if(t.length<8||t.length>400)return;
+    var bl=pxnum(s.borderLeftWidth)>0&&s.borderLeftStyle!=='none';
+    var m=/rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(s.backgroundColor||'');
+    var white=m&&+m[1]>245&&+m[2]>245&&+m[3]>245;
+    var bg=s.backgroundColor&&s.backgroundColor!=='rgba(0, 0, 0, 0)'&&!white;
+    if(bl||bg){
+      quote={borderLeftWidth:s.borderLeftWidth,borderLeftStyle:s.borderLeftStyle,borderLeftColor:s.borderLeftColor,
+        backgroundColor:s.backgroundColor||'rgba(0,0,0,0)',paddingTop:s.paddingTop,paddingBottom:s.paddingBottom,
+        paddingLeft:s.paddingLeft,paddingRight:s.paddingRight,marginTop:s.marginTop,marginBottom:s.marginBottom,
+        color:s.color||bodyColor,fontSize:s.fontSize||bodySize,lineHeight:s.lineHeight||para.lineHeight,borderRadius:s.borderRadius};
+    }
+  });
+
+  /* 列表 / 代码 / 分割线 / 图片 */
+  var lis=[].filter.call(root.querySelectorAll('li'),function(e){return txtOf(e).length>0});
+  var li=lis.length>=2?pick(eff(lis[0],root),['fontSize','color','lineHeight','letterSpacing','marginTop','marginBottom','paddingLeft','textAlign','fontFamily']):null;
+  var pre=root.querySelector('pre'),code=root.querySelector('code');
+  var preS=pre?pick(eff(pre,root),['backgroundColor','padding','borderRadius','fontSize','lineHeight','color','marginTop','marginBottom','fontFamily']):null;
+  var codeS=code?pick(eff(code,root),['fontSize','color','backgroundColor','padding','borderRadius','fontFamily']):null;
+  var hrEl=root.querySelector('hr');
+  var hrS=hrEl?pick(eff(hrEl,root),['borderTopWidth','borderTopStyle','borderTopColor','borderBottomWidth','borderBottomStyle','borderBottomColor','height','backgroundColor','marginTop','marginBottom']):null;
+
+  /* 主题色：非灰高频颜色 */
+  var cw={};
+  root.querySelectorAll('*').forEach(function(el){
+    var t=txtOf(el);if(!t)return;
+    var c=(styleObj(el).color)||eff(el,root).color;
+    if(!c||isGrey(c))return;
+    cw[c]=(cw[c]||0)+Math.min(t.length,200);
+  });
+  var ca=Object.keys(cw).map(function(k){return [k,cw[k]]}).sort(function(a,b){return b[1]-a[1]});
+  var accent=null;
+  for(var i2=0;i2<ca.length;i2++){if(ca[i2][0]!==bodyColor&&ca[i2][1]>=8){accent=ca[i2][0];break}}
+  if(!accent&&ca.length)accent=ca[0][0];
+  if(!accent)accent='#07c160';
+
+  /* 背景 + 原始 CSS */
+  var bg='#ffffff';
+  ['.rich_media_area','.rich_media','#page-content','body'].forEach(function(sel){
+    var e=doc.querySelector(sel);if(!e)return;
+    var c=styleObj(e).backgroundColor;
+    if(c&&c!=='rgba(0, 0, 0, 0)'&&bg==='#ffffff')bg=c;
+  });
+  var rawCss='';
+  doc.querySelectorAll('style').forEach(function(s){rawCss+=(s.textContent||'')+'\n'});
+  rawCss=rawCss.replace(/@font-face\s*\{[^}]*\}/g,'').replace(/\bhtml\s*\{[^}]*\}/g,'').replace(/\bbody\s*\{[^}]*\}/g,'');
+  if(rawCss.length>120000)rawCss=rawCss.slice(0,120000);
+
+  var title=(doc.querySelector('#activity-name')||{}).textContent||doc.title||'(未识别标题)';
+  var account=(doc.querySelector('#js_name')||{}).textContent||'';
+
+  return {meta:{title:(title||'').trim().slice(0,60),account:(account||'').trim()},
+    page:{background:bg,accent:accent,bodySize:bodySize,bodyColor:bodyColor,fontFamily:para.fontFamily||''},
+    container:{className:root.className||'',style:pick(eff(root,root),['color','lineHeight','letterSpacing','textAlign','fontFamily','paddingLeft','paddingRight'])},
+    styles:{p:para,h1:heads.h1||null,h2:heads.h2||null,h3:heads.h3||null,blockquote:quote,li:li,pre:preS,code:codeS,hr:hrS,
+      img:{maxWidth:'100%',display:'block',margin:'0 auto'},a:{color:accent,textDecoration:'none'},strong:{color:accent,fontWeight:'bold'}},
+    rawCss:rawCss};
+}
+
+/* ============ 兜底样式 ============ */
+function fallback(t){
+  var pg=t.page,ac=pg.accent,sz=pxnum(pg.bodySize)||16;
+  var base={fontSize:sz+'px',color:pg.bodyColor,lineHeight:t.styles.p.lineHeight||(sz*1.75)+'px',
+    letterSpacing:t.styles.p.letterSpacing||'0.5px',textAlign:t.styles.p.textAlign||'justify',
+    fontFamily:pg.fontFamily,marginTop:'0px',marginBottom:(sz*1.1)+'px'};
+  function h(r){var d=Object.assign({},base);d.fontSize=(sz*r)+'px';d.fontWeight='bold';d.color=ac;
+    d.lineHeight=(sz*r*1.35)+'px';d.textAlign='left';d.marginTop=(sz*1.3)+'px';d.marginBottom=(sz*0.6)+'px';return {style:d,wrapper:{}}}
+  return {
+    p:base,
+    h1:h(1.5),h2:h(1.3),h3:h(1.15),
+    blockquote:{borderLeftWidth:'3px',borderLeftStyle:'solid',borderLeftColor:ac,backgroundColor:'rgba(0,0,0,0)',
+      paddingTop:'4px',paddingBottom:'4px',paddingLeft:'12px',paddingRight:'8px',marginTop:(sz*0.7)+'px',marginBottom:(sz*0.7)+'px',
+      color:'rgba(0,0,0,0.65)',fontSize:Math.max(sz-1,12)+'px',lineHeight:base.lineHeight,borderRadius:'0px'},
+    li:Object.assign({},base,{marginBottom:(sz*0.4)+'px',textAlign:'left'}),
+    pre:{backgroundColor:'rgba(27,31,35,0.05)',padding:'14px 16px',borderRadius:'6px',fontSize:Math.max(sz-2,12)+'px',
+      lineHeight:(sz*1.6)+'px',color:'#24292e',marginTop:(sz*0.7)+'px',marginBottom:(sz*0.7)+'px',fontFamily:'Menlo,Consolas,monospace'},
+    code:{fontSize:Math.max(sz-2,12)+'px',color:'#c7254e',backgroundColor:'rgba(27,31,35,0.06)',padding:'2px 5px',borderRadius:'3px',fontFamily:'Menlo,Consolas,monospace'},
+    hr:{borderTopWidth:'1px',borderTopStyle:'solid',borderTopColor:'#e5e5e5',borderBottomWidth:'0px',borderBottomStyle:'none',
+      height:'1px',backgroundColor:'rgba(0,0,0,0)',marginTop:(sz*1.3)+'px',marginBottom:(sz*1.3)+'px'},
+    img:{maxWidth:'100%',display:'block',margin:'0 auto',borderRadius:'4px'},
+    a:{color:ac,textDecoration:'none'},strong:{color:ac,fontWeight:'bold'},em:{fontStyle:'italic'},
+    table:{width:'100%',borderCollapse:'collapse',fontSize:Math.max(sz-1,12)+'px',marginTop:(sz*0.7)+'px',marginBottom:(sz*0.7)+'px'},
+    th:{backgroundColor:'rgba(0,0,0,0.04)',padding:'8px 10px',borderTopWidth:'1px',borderTopStyle:'solid',borderTopColor:'#e5e5e5',fontWeight:'bold',textAlign:'left'},
+    td:{padding:'8px 10px',borderTopWidth:'1px',borderTopStyle:'solid',borderTopColor:'#eeeeee'}
+  };
+}
+
+/* ============ Markdown 解析（极简内嵌，无外部依赖） ============ */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function inline(s){
+  s=esc(s);
+  s=s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,function(m,a,b){return '<img src="'+b+'" alt="'+a+'">'});
+  s=s.replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(m,a,b){return '<a href="'+b+'">'+a+'</a>'});
+  s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/(^|\W)\*([^*]+)\*/g,'$1<em>$2</em>');
+  return s;
+}
+function md2html(src){
+  var lines=src.replace(/\r/g,'').split('\n'),out=[],i=0;
+  function flushP(buf){if(buf.length){out.push('<p>'+inline(buf.join(' '))+'</p>');buf.length=0}}
+  var buf=[];
+  while(i<lines.length){
+    var L=lines[i];
+    if(/^```/.test(L)){
+      flushP(buf);i++;var code=[];
+      while(i<lines.length&&!/^```/.test(lines[i])){code.push(esc(lines[i]));i++}
+      i++;out.push('<pre><code>'+code.join('\n')+'</code></pre>');continue;
+    }
+    if(/^\s*$/.test(L)){flushP(buf);i++;continue}
+    if(/^(-{3,}|\*{3,})\s*$/.test(L)){flushP(buf);out.push('<hr>');i++;continue}
+    var m=/^(#{1,6})\s+(.*)$/.exec(L);
+    if(m){flushP(buf);out.push('<h'+m[1].length+'>'+inline(m[2])+'</h'+m[1].length+'>');i++;continue}
+    if(/^\s*>\s?/.test(L)){
+      flushP(buf);var q=[];
+      while(i<lines.length&&/^\s*>\s?/.test(lines[i])){q.push(lines[i].replace(/^\s*>\s?/,''));i++}
+      out.push('<blockquote>'+q.map(function(x){return '<p>'+inline(x)+'</p>'}).join('')+'</blockquote>');continue;
+    }
+    if(/^\s*([-*+]|\d+\.)\s+/.test(L)){
+      flushP(buf);
+      var ordered=/^\s*\d+\./.test(L),items=[];
+      while(i<lines.length&&/^\s*([-*+]|\d+\.)\s+/.test(lines[i])){
+        items.push('<li>'+inline(lines[i].replace(/^\s*([-*+]|\d+\.)\s+/,''))+'</li>');i++;
+      }
+      out.push('<'+(ordered?'ol':'ul')+'>'+items.join('')+'</'+(ordered?'ol':'ul')+'>');continue;
+    }
+    if(/^\s*\|.*\|\s*$/.test(L)&&i+1<lines.length&&/^\s*\|[\s:|-]+\|\s*$/.test(lines[i+1])){
+      flushP(buf);
+      function cells(l){return l.trim().replace(/^\||\|$/g,'').split('|').map(function(c){return c.trim()})}
+      var head=cells(L);i+=2;var body=[];
+      while(i<lines.length&&/^\s*\|.*\|\s*$/.test(lines[i])){body.push(cells(lines[i]));i++}
+      var th='<tr>'+head.map(function(c){return '<th>'+inline(c)+'</th>'}).join('')+'</tr>';
+      var tb=body.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+inline(c)+'</td>'}).join('')+'</tr>'}).join('');
+      out.push('<table><thead>'+th+'</thead><tbody>'+tb+'</tbody></table>');continue;
+    }
+    buf.push(L);i++;
+  }
+  flushP(buf);
+  return out.join('\n');
+}
+
+/* ============ 应用样式 ============ */
+function ss(d,drop){
+  if(!d)return '';var o=[];
+  for(var k in d){if(!d[k]||(drop&&drop.indexOf(k)>=0))continue;o.push(kebab(k)+':'+String(d[k]).replace(/"/g,"'"))}
+  return o.join(';');
+}
+function resolve(t){
+  var s=fallback(t),g=t.styles||{};
+  ['p','blockquote','li','pre','code','hr','img','a','strong'].forEach(function(k){if(g[k])s[k]=g[k]});
+  ['h1','h2','h3'].forEach(function(k){if(g[k])s[k]=g[k]});
+  // 负 margin 清零
+  ['blockquote','li','pre','hr'].forEach(function(k){
+    if(!s[k])return;['marginTop','marginBottom'].forEach(function(m){if(pxnum(s[k][m])<0)s[k][m]='0px'});
+  });
+  // 无效引用兜底
+  var q=s.blockquote||{},m=/rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(q.backgroundColor||'');
+  var white=m&&+m[1]>245&&+m[2]>245&&+m[3]>245;
+  if(pxnum(q.borderLeftWidth)<=0&&(!q.backgroundColor||white||q.backgroundColor==='rgba(0, 0, 0, 0)'))s.blockquote=fallback(t).blockquote;
+  return s;
+}
+function apply(t,mdSrc,tweak){
+  var S=resolve(t),ac=tweak.accent||t.page.accent;
+  var html=md2html(mdSrc);
+  var d=document.createElement('div');d.innerHTML=html;
+  var pDrop=S.p&&(t.styles.wrapper)?['marginTop','marginBottom']:[];
+  function wrap(el,style){
+    if(!style)return;
+    var sec=document.createElement('section');sec.setAttribute('style',style);
+    el.parentNode.insertBefore(sec,el);sec.appendChild(el);
+  }
+  ['p','h1','h2','h3','h4','h5','h6','blockquote','ul','ol','li','pre','code','img','hr','a','strong','em','table','th','td'].forEach(function(tag){
+    [].slice.call(d.querySelectorAll(tag)).forEach(function(el){
+      var n=el.tagName.toLowerCase();
+      if(n==='p'){el.setAttribute('style',ss(S.p,pDrop));wrap(el,t.styles.wrapper?ss(t.styles.wrapper):'')}
+      else if(n==='h1'||n==='h2'||n==='h3'){el.setAttribute('style',ss(S[n].style));wrap(el,ss(S[n].wrapper))}
+      else if(/^h[456]$/.test(n)){el.setAttribute('style',ss(S.h3.style));wrap(el,ss(S.h3.wrapper))}
+      else if(n==='blockquote'){el.setAttribute('style',ss(S.blockquote));
+        [].slice.call(el.querySelectorAll('p')).forEach(function(p){p.setAttribute('style',ss(S.p,['marginTop','marginBottom','textIndent','textAlign']))})}
+      else if(n==='li')el.setAttribute('style',ss(S.li))
+      else if(n==='ul'||n==='ol')el.setAttribute('style','padding-left:1.6em;margin:0.6em 0')
+      else if(n==='pre'){el.setAttribute('style',ss(S.pre));
+        [].slice.call(el.querySelectorAll('code')).forEach(function(c){c.setAttribute('style','background:transparent;padding:0')})}
+      else if(n==='code'){if(el.parentNode.tagName==='PRE')return;el.setAttribute('style',ss(S.code))}
+      else if(n==='img')el.setAttribute('style',ss(S.img)+';height:auto')
+      else if(n==='hr')el.setAttribute('style',ss(S.hr))
+      else if(n==='a')el.setAttribute('style',ss(S.a))
+      else if(n==='strong'){if(/^H[1-6]$/.test(el.parentNode.tagName))return;el.setAttribute('style',ss(S.strong))}
+      else if(n==='em')el.setAttribute('style',ss(S.em))
+      else if(n==='table')el.setAttribute('style',ss(S.table))
+      else if(n==='th')el.setAttribute('style',ss(S.th))
+      else if(n==='td')el.setAttribute('style',ss(S.td))
+    });
+  });
+  // 微调覆盖
+  if(tweak.accent){
+    [].slice.call(d.querySelectorAll('a,strong,h1,h2,h3,h4,h5,h6')).forEach(function(el){
+      var s=el.getAttribute('style')||'';
+      s=s.replace(/(^|;)color:[^;]*/g,'$1color:'+tweak.accent);
+      if(!/color:/.test(s))s+=';color:'+tweak.accent;
+      el.setAttribute('style',s);
+    });
+    if(S.blockquote&&pxnum(S.blockquote.borderLeftWidth)>0){
+      [].slice.call(d.querySelectorAll('blockquote')).forEach(function(el){
+        var s=el.getAttribute('style')||'';
+        s=s.replace(/(^|;)border-left-color:[^;]*/g,'$1border-left-color:'+tweak.accent);
+        el.setAttribute('style',s);
+      });
+    }
+  }
+  ['p','li','blockquote'].forEach(function(tag){
+    [].slice.call(d.querySelectorAll(tag)).forEach(function(el){
+      var s=el.getAttribute('style')||'',add='';
+      if(tweak.fontSize)add+=';font-size:'+tweak.fontSize+'px';
+      if(tweak.lineHeight){
+        var fs=tweak.fontSize||pxnum(S.p.fontSize)||16;
+        add+=';line-height:'+(tweak.lineHeight*fs)+'px';
+      }
+      if(tweak.letterSpacing)add+=';letter-spacing:'+tweak.letterSpacing+'px';
+      if(tweak.indent)add+=';text-indent:'+tweak.indent+'em';
+      if(add)el.setAttribute('style',s+add);
+    });
+  });
+  return d.innerHTML;
+}
+
+function page(t,body,tweak,title){
+  var bg=tweak.background||t.page.background||'#ffffff';
+  if(bg==='rgba(0, 0, 0, 0)')bg='#ffffff';
+  var cs=ss(t.container&&t.container.style?t.container.style:{});
+  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
+    +'<meta name="viewport" content="width=device-width,initial-scale=1">'
+    +'<title>'+esc(title||'排版成品')+'</title><style>'
+    +(t.rawCss||'')
+    +'\n#js_content,#js_content *{visibility:visible!important;-webkit-text-size-adjust:100%}'
+    +'\n#js_content{opacity:1!important;max-width:100%!important;box-sizing:border-box!important;overflow-wrap:break-word}'
+    +'\n#js_content img{max-width:100%!important;height:auto!important}'
+    +'\n#js_content pre{overflow-x:auto;white-space:pre-wrap;word-break:break-word}'
+    +'\n#js_content table{width:100%;border-collapse:collapse}'
+    +'\n.wx-wrap{max-width:677px;margin:0 auto}</style></head>'
+    +'<body style="margin:0;padding:0;background:'+bg+';"><div class="wx-wrap">'
+    +'<div id="js_content" class="'+((t.container&&t.container.className)||'')+'" style="'+cs+'">'
+    +body+'</div></div></body></html>';
+}
+
+/* ============ 交互 ============ */
+function useHtml(html,from){
+  try{
+    THEME=extractTheme(html);
+    $('meta').style.display='block';
+    $('mTitle').textContent=THEME.meta.title||'(未识别)';
+    $('mSize').textContent=THEME.page.bodySize;
+    $('mLh').textContent=THEME.styles.p.lineHeight||'-';
+    $('mC').textContent=THEME.page.bodyColor;$('mCd').style.background=THEME.page.bodyColor;
+    $('mA').textContent=THEME.page.accent;$('mAd').style.background=THEME.page.accent;
+    $('tA').value=toHex(THEME.page.accent,'#07c160');
+    $('tB').value=toHex(THEME.page.background,'#ffffff');
+    st('✅ 样式已提取：'+THEME.meta.title+'（来源：'+from+'）','ok');
+    $('barInfo').textContent='样板：'+(THEME.meta.title||'').slice(0,24);
+    if($('md').value.trim())go();
+  }catch(e){st('❌ 解析失败：'+e.message,'err')}
+}
+function toHex(c,f){
+  if(!c)return f;
+  if(c[0]==='#')return c.length===4?'#'+c.slice(1).split('').map(function(x){return x+x}).join(''):c;
+  var m=/rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c);
+  if(!m)return f;
+  return '#'+[+m[1],+m[2],+m[3]].map(function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
+}
+function loadFromText(){
+  var v=$('srcHtml').value.trim();
+  if(!v){st('请先粘贴页面源码','err');return}
+  useHtml(v,'粘贴框');
+}
+function loadFromUrl(){
+  var u=$('url').value.trim();
+  if(!u){st('请输入链接','err');return}
+  if(!/^https?:\/\//.test(u))u='https://'+u;
+  if(u.indexOf('mp.weixin.qq.com')<0){st('只支持 mp.weixin.qq.com 的文章链接','err');return}
+  var b=event.target;busy(b,true,'抓取中');
+  var prox=['https://api.allorigins.win/raw?url=','https://api.codetabs.com/v1/proxy?quest=','https://corsproxy.io/?url=','https://api.cors.lol/?url='];
+  var enc=encodeURIComponent(u),i=0;
+  function next(){
+    if(i>=prox.length){busy(b,false);st('❌ 所有代理都失败了（跨域限制）。请用「源码导入」：文章页按 Ctrl+U 全选复制，粘贴到上方框里。','err');return}
+    var url=prox[i++]+enc;
+    fetch(url).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})
+      .then(function(t){
+        if(t.length<5000||t.indexOf('js_content')<0)throw new Error('内容不含正文');
+        busy(b,false);useHtml(t,'链接代理');
+      }).catch(function(){next()});
+  }
+  next();
+}
+$('drop').addEventListener('click',function(){$('file').click()});
+$('file').addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){useHtml(r.result,f.name)};
+  r.readAsText(f);
+});
+['dragenter','dragover'].forEach(function(e){
+  $('drop').addEventListener(e,function(ev){ev.preventDefault();$('drop').classList.add('over')});
+});
+['dragleave','drop'].forEach(function(e){
+  $('drop').addEventListener(e,function(ev){ev.preventDefault();$('drop').classList.remove('over')});
+});
+$('drop').addEventListener('drop',function(ev){
+  var f=ev.dataTransfer.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(){useHtml(r.result,f.name)};r.readAsText(f);
+});
+function loadMd(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(){$('md').value=r.result;st('已载入 '+f.name,'ok')};r.readAsText(f);
+}
+function tweak(){
+  var t={};
+  if($('tA').value)t.accent=$('tA').value;
+  if($('tB').value)t.background=$('tB').value;
+  if($('tS').value)t.fontSize=+$('tS').value;
+  if($('tL').value)t.lineHeight=+$('tL').value;
+  if($('tLs').value)t.letterSpacing=+$('tLs').value;
+  if($('tI').value)t.indent=+$('tI').value;
+  return t;
+}
+function go(){
+  if(!THEME){st('请先导入样板文章（第 1 步）','err');return}
+  var md=$('md').value.trim();
+  if(!md){st('请先粘贴 Markdown（第 2 步）','err');return}
+  try{
+    var body=apply(THEME,md,tweak());
+    var title=(THEME.meta.title||'排版成品');
+    LAST.frag=body;
+    LAST.html=page(THEME,body,tweak(),title);
+    $('empty').style.display='none';$('phone').style.display='block';
+    $('fr').srcdoc=LAST.html;
+    st('✅ 生成完成，右侧即成品效果','ok');
+  }catch(e){st('❌ 生成失败：'+e.message,'err')}
+}
+function dl(){
+  if(!LAST.html){st('请先生成','err');return}
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([LAST.html],{type:'text/html'}));
+  a.download='排版成品.html';a.click();
+}
+function copyFrag(){
+  if(!LAST.frag){st('请先生成','err');return}
+  var plain=document.createElement('div');plain.innerHTML=LAST.frag;
+  try{
+    var item=new ClipboardItem({'text/html':new Blob([LAST.frag],{type:'text/html'}),
+      'text/plain':new Blob([plain.textContent],{type:'text/plain'})});
+    navigator.clipboard.write([item]).then(function(){
+      st('✅ 已复制（带格式）→ 打开公众号后台编辑器 Ctrl+V 粘贴即可','ok');
+    },function(){plainFallback()});
+  }catch(e){plainFallback()}
+  function plainFallback(){
+    navigator.clipboard.writeText(LAST.frag).then(function(){st('✅ 已复制，粘贴到公众号编辑器试试','ok')},
+      function(){st('浏览器拒绝剪贴板权限，请改用「下载 HTML」','err')});
+  }
+}
+function png(){
+  if(!LAST.html){st('请先生成','err');return}
+  var b=event.target;busy(b,true,'导出中');
+  try{
+    var doc=new DOMParser().parseFromString(LAST.html,'text/html');
+    var root=doc.querySelector('#js_content');
+    var W=750,H=Math.max(root.scrollHeight||2000,2000);
+    // 移除跨域图片避免污染 canvas
+    [].slice.call(root.querySelectorAll('img')).forEach(function(im){
+      if(im.src&&im.src.indexOf('data:')!==0)im.remove();
+    });
+    var css=[].slice.call(doc.querySelectorAll('style')).map(function(s){return s.textContent}).join('\n');
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'">'
+      +'<foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;background:#fff;padding:20px">'
+      +'<style>'+css+'</style>'+root.outerHTML+'</div></foreignObject></svg>';
+    var img=new Image();
+    var blob=new Blob([svg],{type:'image/svg+xml'});
+    var url=URL.createObjectURL(blob);
+    img.onload=function(){
+      var c=document.createElement('canvas');c.width=W;c.height=H;
+      var ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.drawImage(img,0,0);
+      URL.revokeObjectURL(url);
+      c.toBlob(function(bb){
+        busy(b,false);
+        if(!bb){st('导出失败：画布被跨域图片污染，请用「下载 HTML」或系统截图','err');return}
+        var a=document.createElement('a');a.href=URL.createObjectURL(bb);a.download='排版长图.png';a.click();
+        st('✅ 长图已导出（约 '+Math.round(bb.size/1024)+' KB）','ok');
+      });
+    };
+    img.onerror=function(){busy(b,false);st('导出失败，请改用「下载 HTML」后在浏览器里截图','err')};
+    img.src=url;
+  }catch(e){busy(b,false);st('导出失败：'+e.message,'err')}
+}
+function sample(){
+  $('md').value='# 为什么我们需要「慢下来」的能力\n\n这是套用样板文章样式后的正文，用来检查字号、行距、字间距是否一致。\n\n## 一、先从一个问题说起\n\n我们习惯把效率当成唯一指标，但**真正重要的判断**往往需要时间沉淀：\n\n1. 决策质量与信息密度并非线性关系\n2. 快速反馈容易让人误判因果关系\n3. 留白本身就是一种生产力\n\n> 慢不是拖延，而是把注意力放在真正重要的事情上。\n\n### 1.1 一个对照实验\n\n| 组别 | 决策耗时 | 正确率 |\n| --- | --- | --- |\n| 快速组 | 3 分钟 | 52% |\n| 慢思组 | 15 分钟 | 78% |\n\n## 二、怎么做\n\n```python\ndef think(problem, minutes=15):\n    return decide([observe(problem, i) for i in range(minutes)])\n```\n\n- 每天留出 30 分钟不被打断的时间\n- 用纸笔替代屏幕做第一轮梳理\n\n---\n\n*如果你也认同，欢迎转发给需要的朋友。*';
+  st('示例已载入，点「生成同款排版」','ok');
+}
+$('md').addEventListener('input',function(){clearTimeout(window._t);if(THEME&&$('md').value.trim())window._t=setTimeout(go,1200)});
+['tA','tB','tS','tL','tLs','tI'].forEach(function(id){
+  $(id).addEventListener('input',function(){clearTimeout(window._t2);if(THEME&&$('md').value.trim())window._t2=setTimeout(go,600)});
+});
+</script>
+</body>
+</html>
